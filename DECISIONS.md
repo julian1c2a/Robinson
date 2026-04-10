@@ -1,7 +1,7 @@
-# Design Decisions — ProjectName
+# Design Decisions — Robinson
 
-**Last updated:** 2025-01-01 00:00
-**Author**: Your Name
+**Last updated:** 2026-04-10 00:00
+**Author**: Julián Calderón Almendros
 
 Architectural Decision Records (ADR) for this project.
 Each entry records *what* was decided and *why*, for future reference.
@@ -65,7 +65,7 @@ Each entry records *what* was decided and *why*, for future reference.
 **Date**: 2025-01-01
 **Status**: Accepted
 
-**Decision**: Each subdirectory corresponds to a sub-namespace: `ProjectName/Foo/Bar.lean` → `namespace ProjectName.Foo.Bar`.
+**Decision**: Each subdirectory corresponds to a sub-namespace: `Robinson/Foo/Bar.lean` → `namespace Robinson.Foo.Bar`.
 
 **Rationale**: Clear 1:1 mapping between file system and namespace hierarchy. Reduces confusion about where definitions live. Scales well as the project grows.
 

@@ -13,10 +13,10 @@
 #            Frozen status can only be reverted with 'thaw --confirm' in emergencies.
 #
 # Usage:
-#   bash git-lock.bash lock   ProjectName/Module.lean   # temporary lock
-#   bash git-lock.bash unlock ProjectName/Module.lean   # temporary unlock (blocked if frozen)
-#   bash git-lock.bash freeze ProjectName/Module.lean   # permanent freeze (Complete -> Frozen)
-#   bash git-lock.bash thaw   ProjectName/Module.lean --confirm  # emergency unfreeze
+#   bash git-lock.bash lock   Robinson/Module.lean   # temporary lock
+#   bash git-lock.bash unlock Robinson/Module.lean   # temporary unlock (blocked if frozen)
+#   bash git-lock.bash freeze Robinson/Module.lean   # permanent freeze (Complete -> Frozen)
+#   bash git-lock.bash thaw   Robinson/Module.lean --confirm  # emergency unfreeze
 #   bash git-lock.bash list                             # show all locked and frozen files
 #   bash git-lock.bash init                             # install/reinstall pre-commit hook
 #

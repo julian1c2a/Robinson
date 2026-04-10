@@ -1,6 +1,6 @@
 /-
-Copyright (c) 2025. All rights reserved.
-Author: Your Name
+Copyright (c) 2026. All rights reserved.
+Author: Julián Calderón Almendros
 License: MIT
 -/
 
@@ -8,12 +8,12 @@ License: MIT
 -- See AI-GUIDE.md §12 for the "proyectar" protocol.
 -- See NAMING-CONVENTIONS.md for naming rules.
 --
--- Dependencies: ProjectName.Prelim (add more as needed)
+-- Dependencies: Robinson.Prelim (add more as needed)
 -- @axiom_system: none
 -- @importance: medium
 
-import ProjectName.Prelim
--- import ProjectName.OtherModule
+import Robinson.Prelim
+-- import Robinson.OtherModule
 
 -- Available from Prelim (no re-import needed):
 --   ExistsUnique, ∃! x, p, ∃¹ x, p
@@ -21,7 +21,7 @@ import ProjectName.Prelim
 --   choose_unique / choose_spec_unique / choose_uniq  (Peano-compatible)
 --   Classical.*   (via open Classical in Prelim)
 
-namespace ProjectName.ModuleName
+namespace Robinson.ModuleName
 
 -- ============================================================
 -- Section 1: Definitions
@@ -52,9 +52,9 @@ namespace ProjectName.ModuleName
 -- This block goes AFTER end namespace, at top level.
 -- Notation/syntax propagates automatically — do not list here.
 
-end ProjectName.ModuleName
+end Robinson.ModuleName
 
-export ProjectName.ModuleName (
+export Robinson.ModuleName (
   -- myDef
   -- myTheorem
 )

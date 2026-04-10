@@ -1,9 +1,9 @@
 #!/bin/bash
-# gen-root.bash — Regenerate root ProjectName.lean with barrel-aware imports
+# gen-root.bash — Regenerate root Robinson.lean with barrel-aware imports
 #
 # Usage: bash gen-root.bash
 #
-# Scans ProjectName/ for all .lean files (excluding _template.lean and test files).
+# Scans Robinson/ for all .lean files (excluding _template.lean and test files).
 # If a subdirectory has a barrel file (e.g., CList.lean for CList/), the root
 # imports only the barrel instead of listing each sub-module individually.
 # This follows the export/glob pattern defined in AI-GUIDE.md §23, §30–33.
@@ -30,7 +30,7 @@ fi
 ROOT_FILE="${PROJECT_NAME}.lean"
 MODULE_DIR="${PROJECT_NAME}"
 YEAR=$(date +%Y)
-AUTHOR=$(git config user.name 2>/dev/null || echo "Your Name")
+AUTHOR=$(git config user.name 2>/dev/null || echo "Julián Calderón Almendros")
 
 # Collect barrel-covered subdirectories
 declare -A BARREL_DIRS

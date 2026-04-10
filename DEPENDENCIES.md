@@ -1,12 +1,12 @@
-# Dependency Diagram — ProjectName
+# Dependency Diagram — Robinson
 
-**Last updated:** 2025-01-01 00:00
-**Author**: Your Name
+**Last updated:** 2026-04-10 00:00
+**Author**: Julián Calderón Almendros
 
 ## Project Structure
 
 ```
-ProjectName/
+Robinson/
 ├── Prelim.lean         # Preliminary definitions
 ├── _template.lean      # Module template (not imported)
 ├── Core/               # (subdirectory example)
@@ -14,7 +14,7 @@ ProjectName/
 └── Topic/              # (subdirectory example)
     ├── Basic.lean
     └── Advanced.lean
-ProjectName.lean        # Root module
+Robinson.lean        # Root module
 ```
 
 ## Dependency Graph
@@ -22,7 +22,7 @@ ProjectName.lean        # Root module
 ```mermaid
 graph TD
     P[Prelim.lean]
-    Z[ProjectName.lean] --> P
+    Z[Robinson.lean] --> P
 ```
 
 *(Update this diagram as modules are added. Use subdirectory grouping:)*
@@ -41,7 +41,7 @@ graph TD
     TB --> P
     TB --> CB
     TA --> TB
-    Z[ProjectName.lean] --> P
+    Z[Robinson.lean] --> P
     Z --> CB
     Z --> TB
     Z --> TA
@@ -49,16 +49,16 @@ graph TD
 
 ## Namespace Hierarchy
 
-### 1. **ProjectName** (root)
+### 1. **Robinson** (root)
 
 ```lean
--- ProjectName.lean imports all modules
+-- Robinson.lean imports all modules
 ```
 
-### 2. **ProjectName.Prelim**
+### 2. **Robinson.Prelim**
 
 ```lean
-namespace ProjectName.Prelim
+namespace Robinson.Prelim
   -- Preliminary definitions
 ```
 
@@ -80,14 +80,14 @@ namespace ProjectName.Prelim
 
 ### Level N: Root
 
-- `ProjectName.lean` — imports all modules
+- `Robinson.lean` — imports all modules
 
 ## Exports by Module
 
 ### Prelim.lean
 
 ```lean
-export ProjectName.Prelim (
+export Robinson.Prelim (
   -- exported names here
 )
 ```

@@ -1,7 +1,21 @@
-# Thoughts — ProjectName
+# Thoughts — Robinson
 
-**Last updated:** 2025-01-01 00:00
-**Author**: Your Name
+
+# Ideas para comenzar
+
+> Este proyecto va a implementar la artimética de Robinson en Lean 4. La idea es formalizar los axiomas de Robinson y luego demostrar algunos teoremas básicos sobre esta aritmética.
+> Se define sobre un lenguaje con el número 0, la función sucesor, la suma y la multiplicación:
+
+    1. El cero no es el sucesor de ningún número.
+    2. El sucesor es una función inyectiva.
+    3. Todo número distinto de cero es el sucesor de algún número (este axioma es crucial porque compensa la falta de inducción).
+    4. Definición base de la suma.
+    5. Definición recursiva de la suma.
+    6. Definición base de la multiplicación.
+    7. Definición recursiva de la multiplicación.
+
+**Last updated:** 2026-04-10 00:00
+**Author**: Julián Calderón Almendros
 
 > This is an informal design journal. Record ideas, alternatives considered,
 > open questions, and future directions here. Not normative — purely exploratory.
