@@ -124,8 +124,13 @@ axiom Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x
 
 /-! ### Decidability Instance ### -/
 
-/-- Make decidability of zero available globally -/
-instance (x : ℕ) : Decidable (x = zero) := Q_decidable_zero x
+/-- Make decidability of zero available globally.
+    
+    Note: This is noncomputable because it's based on an axiom.
+    Use `haveI : Decidable (x = zero) := Q_decidable_zero x` in proofs
+    where you need decidability.
+-/
+noncomputable instance (x : ℕ) : Decidable (x = zero) := Q_decidable_zero x
 
 /-! ### Basic Derived Properties ### -/
 
