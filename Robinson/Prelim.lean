@@ -61,17 +61,25 @@ theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
 
 /-- Extract the unique witness (computable from the proof) -/
 def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  h.1
+  h.exists.choose
 
 /-- The witness satisfies the property -/
 theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    p (h.choose) :=
-  h.2.1
+    p (h.choose) := by
+  unfold choose
+  obtain ⟨w, hw, huniq⟩ := h
+  convert hw
+  apply huniq
+  exact h.exists.choose_spec
 
 /-- Uniqueness: any y satisfying p equals the witness -/
 theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∀ y, p y → y = h.choose :=
-  h.2.2
+    ∀ y, p y → y = h.choose := by
+  intro y hy
+  unfold choose
+  obtain ⟨w, hw, huniq⟩ := h
+  rw [← huniq _ h.exists.choose_spec]
+  exact huniq y hy
 
 /-! ### API — Peano-compatible aliases ###
 
