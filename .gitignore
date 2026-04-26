@@ -23,3 +23,6 @@ Thumbs.db
 
 # Lock file temp
 locked_files.txt.tmp
+.aider*
+.env
+.env
