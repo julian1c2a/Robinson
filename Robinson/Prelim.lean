@@ -21,12 +21,14 @@ universe u
 
   Definition: p has a unique witness iff ∃ x, p x ∧ ∀ y, p y → y = x
 
-  ⚠️ CONSTRUCTIVE: The witness is provided explicitly in the proof.
-  No classical choice axiom is used. All operations are computable.
+  ⚠️ CONSTRUCTIVE: Implemented as a structure with explicit witness field.
+  The witness is directly accessible and computable. No classical axioms used.
 -/
 
-def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
-  ∃ x, p x ∧ ∀ y, p y → y = x
+structure ExistsUnique {α : Sort u} (p : α → Prop) : Prop where
+  witness : α
+  property : p witness
+  unique : ∀ y, p y → y = witness
 
 /-! ### Notation ###
   ∃! x, p   — standard-looking notation (overrides Lean built-in ∃!)
@@ -55,36 +57,22 @@ theorem ExistsUnique.intro {α : Sort u} {p : α → Prop} (w : α)
 
 /-- Extract ∃ x, p x from ExistsUnique p -/
 theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∃ x, p x := by
-  obtain ⟨x, hx, _⟩ := h
-  exact ⟨x, hx⟩
+    ∃ x, p x :=
+  ⟨h.witness, h.property⟩
 
-/-- Extract the unique witness (noncomputable, uses choice) -/
-noncomputable def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  h.exists.choose
+/-- Extract the unique witness (computable, direct field access) -/
+def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+  h.witness
 
 /-- The witness satisfies the property -/
 theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    p (h.choose) := by
-  unfold choose
-  obtain ⟨w, hw, huniq⟩ := h
-  have : h.exists.choose = w := by
-    apply huniq
-    exact h.exists.choose_spec
-  rw [this]
-  exact hw
+    p (h.choose) :=
+  h.property
 
 /-- Uniqueness: any y satisfying p equals the witness -/
-theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∀ y, p y → y = h.choose := by
-  intro y hy
-  unfold choose
-  obtain ⟨w, hw, huniq⟩ := h
-  have : h.exists.choose = w := by
-    apply huniq
-    exact h.exists.choose_spec
-  rw [this]
-  exact huniq y hy
+theorem ExistsUnique.eq_witness {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
+    ∀ y, p y → y = h.choose :=
+  h.unique
 
 /-! ### API — Peano-compatible aliases ###
 
@@ -92,7 +80,7 @@ theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   These are thin wrappers; no new logic. -/
 
 /-- Alias for ExistsUnique.choose (Peano style) -/
-noncomputable def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
   h.choose
 
 /-- Alias for ExistsUnique.choose_spec (Peano style) -/
@@ -100,10 +88,10 @@ theorem choose_spec_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) 
     p (choose_unique h) :=
   h.choose_spec
 
-/-- Alias for ExistsUnique.unique with implicit y (Peano argument style) -/
+/-- Alias for ExistsUnique.eq_witness with implicit y (Peano argument style) -/
 theorem choose_uniq {α : Sort u} {p : α → Prop} (h : ExistsUnique p) {y : α} (hy : p y) :
     y = choose_unique h :=
-  h.unique y hy
+  h.eq_witness y hy
 
 /-! ### User definitions go below this line ###
   Add preliminary definitions, notations, and helper lemmas specific
