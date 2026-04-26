@@ -334,7 +334,7 @@ theorem ExistsUnique.intro {α : Sort u} {p : α → Prop} (w : α)
 theorem ExistsUnique.exists {α : Sort u} {p : α → Prop}
     (h : ExistsUnique p) : ∃ x, p x
 
-noncomputable def ExistsUnique.choose {α : Sort u} {p : α → Prop}
+def ExistsUnique.choose {α : Sort u} {p : α → Prop}
     (h : ExistsUnique p) : α
 
 theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop}
@@ -344,7 +344,7 @@ theorem ExistsUnique.unique {α : Sort u} {p : α → Prop}
     (h : ExistsUnique p) : ∀ y, p y → y = h.choose
 
 -- Peano-compatible aliases:
-noncomputable def choose_unique {α : Sort u} {p : α → Prop}
+def choose_unique {α : Sort u} {p : α → Prop}
     (h : ExistsUnique p) : α
 
 theorem choose_spec_unique {α : Sort u} {p : α → Prop}
