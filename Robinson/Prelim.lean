@@ -59,8 +59,8 @@ theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   obtain ⟨x, hx, _⟩ := h
   exact ⟨x, hx⟩
 
-/-- Extract the unique witness (computable from the proof) -/
-def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+/-- Extract the unique witness (noncomputable, uses choice) -/
+noncomputable def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
   h.exists.choose
 
 /-- The witness satisfies the property -/
@@ -68,9 +68,11 @@ theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUniq
     p (h.choose) := by
   unfold choose
   obtain ⟨w, hw, huniq⟩ := h
-  convert hw
-  apply huniq
-  exact h.exists.choose_spec
+  have : h.exists.choose = w := by
+    apply huniq
+    exact h.exists.choose_spec
+  rw [this]
+  exact hw
 
 /-- Uniqueness: any y satisfying p equals the witness -/
 theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
@@ -78,7 +80,10 @@ theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   intro y hy
   unfold choose
   obtain ⟨w, hw, huniq⟩ := h
-  rw [← huniq _ h.exists.choose_spec]
+  have : h.exists.choose = w := by
+    apply huniq
+    exact h.exists.choose_spec
+  rw [this]
   exact huniq y hy
 
 /-! ### API — Peano-compatible aliases ###
@@ -87,7 +92,7 @@ theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   These are thin wrappers; no new logic. -/
 
 /-- Alias for ExistsUnique.choose (Peano style) -/
-def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+noncomputable def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
   h.choose
 
 /-- Alias for ExistsUnique.choose_spec (Peano style) -/
