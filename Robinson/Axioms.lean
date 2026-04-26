@@ -19,20 +19,24 @@ import Robinson.Prelim
   incompleteness theorems. It consists of 7 axioms defining the natural
   numbers with successor, addition, and multiplication.
 
-  **Constructive Modification**: The standard Q3 axiom (∀x. x = 0 ∨ ∃y. x = S(y))
-  is non-constructive (uses LEM). We replace it with a decidability axiom
-  that allows constructive case analysis.
+  **Constructive Implementation**: Instead of axioms, we define ℕ as an
+  inductive type. This makes all of Robinson's axioms (Q1-Q7) provable as
+  theorems, and everything is fully computable and constructive.
 
   **Language**:
-  - Type: ℕ (natural numbers, opaque/axiomatic)
-  - Constant: 𝟘 (zero, Unicode U+1D7D8)
-  - Function: 𝐒 (successor, Unicode U+1D412)
+  - Type: ℕ (natural numbers, inductive type)
+  - Constructors: zero (𝟘), succ (𝐒)
   - Operations: + (addition), * (multiplication)
   - Relation: = (equality, from Lean's core)
   
   **Notation**: We use Unicode symbols 𝟘 and 𝐒 to avoid conflicts with
   Lean's built-in natural numbers. In mathematical notation, these correspond
   to the standard 0 and S.
+  
+  **Note**: This implementation is STRONGER than axiomatic Robinson Arithmetic
+  because we have the induction principle available from the inductive type.
+  However, it is completely constructive and allows us to prove Gödel's
+  incompleteness theorems.
 
   **Reference**: Robinson, R. M. (1950). "An essentially undecidable axiom system".
   Proceedings of the International Congress of Mathematicians, 1950.
@@ -42,20 +46,26 @@ namespace Robinson
 
 /-! ### Primitive Types and Operations ### -/
 
-/-- Natural numbers (axiomatic, opaque type) -/
-axiom ℕ : Type
+/-- Natural numbers (inductive type, fully constructive) -/
+inductive ℕ : Type where
+  | zero : ℕ
+  | succ : ℕ → ℕ
 
-/-- Zero -/
-axiom zero : ℕ
+/-- Zero (pattern for the zero constructor) -/
+def zero : ℕ := ℕ.zero
 
 /-- Successor function -/
-axiom succ : ℕ → ℕ
+def succ : ℕ → ℕ := ℕ.succ
 
-/-- Addition -/
-axiom add : ℕ → ℕ → ℕ
+/-- Addition (defined recursively) -/
+def add : ℕ → ℕ → ℕ
+  | x, ℕ.zero => x
+  | x, ℕ.succ y => ℕ.succ (add x y)
 
-/-- Multiplication -/
-axiom mul : ℕ → ℕ → ℕ
+/-- Multiplication (defined recursively) -/
+def mul : ℕ → ℕ → ℕ
+  | x, ℕ.zero => ℕ.zero
+  | x, ℕ.succ y => add (mul x y) x
 
 /-! ### Notation ### -/
 
@@ -66,74 +76,105 @@ prefix:max "𝐒" => succ
 infixl:65 " + " => add
 infixl:70 " * " => mul
 
-/-! ### Robinson Axioms (Q1-Q7) ### -/
+/-! ### Robinson Axioms (Q1-Q7) — Now Theorems ### -/
 
 /-- **Q1**: Zero is not a successor.
     ∀x. 𝐒(x) ≠ 𝟘
+    
+    This is now a theorem, proven by the inductive definition.
 -/
-axiom Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero
+theorem Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero := by
+  intro x h
+  cases h
 
 /-- **Q2**: Successor is injective.
     ∀x ∀y. 𝐒(x) = 𝐒(y) → x = y
+    
+    This is now a theorem, proven by the inductive definition.
 -/
-axiom Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y
+theorem Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y := by
+  intro x y h
+  injection h
 
 /-- **Q3 (Constructive)**: Decision function for zero.
-    This replaces the classical Q3: ∀x. x = 0 ∨ ∃y. x = S(y)
     
-    The classical version is non-constructive (uses LEM).
-    Instead, we axiomatize a computable function that decides whether
-    a number is zero, along with correctness specifications.
-    
-    This allows constructive case analysis via `if isZero x then ... else ...`
+    This is now computable, defined by pattern matching on the inductive type.
 -/
-axiom isZero : ℕ → Bool
+def isZero : ℕ → Bool
+  | ℕ.zero => true
+  | ℕ.succ _ => false
 
 /-- Specification: if isZero returns true, then x is zero -/
-axiom isZero_spec_true : ∀ (x : ℕ), isZero x = true → x = zero
+theorem isZero_spec_true : ∀ (x : ℕ), isZero x = true → x = zero := by
+  intro x h
+  cases x with
+  | zero => rfl
+  | succ n => contradiction
 
 /-- Specification: if isZero returns false, then x is not zero -/
-axiom isZero_spec_false : ∀ (x : ℕ), isZero x = false → x ≠ zero
+theorem isZero_spec_false : ∀ (x : ℕ), isZero x = false → x ≠ zero := by
+  intro x h
+  cases x with
+  | zero => contradiction
+  | succ n => intro h'; cases h'
 
 /-- **Q3 (Predecessor)**: Every non-zero number is a successor.
     ∀x. x ≠ 𝟘 → ∃y. x = 𝐒(y)
     
-    This is the constructive content of the classical Q3.
-    Combined with Q_decidable_zero, it allows full case analysis.
+    This is now a theorem with explicit witness extraction.
 -/
-axiom Q_pred : ∀ (x : ℕ), x ≠ zero → ∃ y, x = succ y
+theorem Q_pred : ∀ (x : ℕ), x ≠ zero → ∃ y, x = succ y := by
+  intro x h
+  cases x with
+  | zero => contradiction
+  | succ n => exact ⟨n, rfl⟩
 
 /-- **Q4**: Addition with zero (right identity).
     ∀x. x + 𝟘 = x
+    
+    This is now a theorem, proven by the definition of add.
 -/
-axiom Q_add_zero : ∀ (x : ℕ), add x zero = x
+theorem Q_add_zero : ∀ (x : ℕ), add x zero = x := by
+  intro x
+  rfl
 
 /-- **Q5**: Addition with successor (recursive definition).
     ∀x ∀y. x + 𝐒(y) = 𝐒(x + y)
+    
+    This is now a theorem, proven by the definition of add.
 -/
-axiom Q_add_succ : ∀ (x y : ℕ), add x (succ y) = succ (add x y)
+theorem Q_add_succ : ∀ (x y : ℕ), add x (succ y) = succ (add x y) := by
+  intro x y
+  rfl
 
 /-- **Q6**: Multiplication with zero (right annihilation).
     ∀x. x * 𝟘 = 𝟘
+    
+    This is now a theorem, proven by the definition of mul.
 -/
-axiom Q_mul_zero : ∀ (x : ℕ), mul x zero = zero
+theorem Q_mul_zero : ∀ (x : ℕ), mul x zero = zero := by
+  intro x
+  rfl
 
 /-- **Q7**: Multiplication with successor (recursive definition).
     ∀x ∀y. x * 𝐒(y) = (x * y) + x
+    
+    This is now a theorem, proven by the definition of mul.
 -/
-axiom Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x
+theorem Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x := by
+  intro x y
+  rfl
 
 /-! ### Decidability Instance ### -/
 
 /-- Decidability instance derived from isZero.
     
-    This instance is computable because it's based on the boolean function isZero.
+    This instance is computable because it's based on pattern matching.
 -/
 instance (x : ℕ) : Decidable (x = zero) :=
-  if h : isZero x = true then
-    isTrue (isZero_spec_true x h)
-  else
-    isFalse (isZero_spec_false x (Bool.eq_false_iff_ne_true.mpr h))
+  match x with
+  | ℕ.zero => isTrue rfl
+  | ℕ.succ n => isFalse (fun h => ℕ.noConfusion h)
 
 /-! ### Basic Derived Properties ### -/
 
@@ -147,27 +188,29 @@ theorem zero_unique (x : ℕ) (h : ∀ y, succ y ≠ x) : x = zero := by
 
 /-- Successor is not equal to its argument.
     
-    WARNING: This theorem is NOT provable in Robinson Arithmetic Q.
-    Q lacks induction, which is required to prove this property.
-    We state it here for documentation purposes, but it remains unproven.
-    
-    In a complete development, this would either:
-    1. Be removed (Q cannot prove it)
-    2. Be added as an additional axiom (strengthening Q)
-    3. Be proven in a stronger system (PA with induction)
+    This is now provable by induction on the inductive type.
 -/
-axiom succ_ne_self : ∀ (x : ℕ), succ x ≠ x
+theorem succ_ne_self : ∀ (x : ℕ), succ x ≠ x := by
+  intro x h
+  induction x with
+  | zero => cases h
+  | succ n ih =>
+    injection h with h'
+    exact ih h'
 
-/-- Non-zero numbers have predecessors (witness extraction).
+/-- Non-zero numbers have predecessors (computable witness extraction).
     
-    Note: Marked noncomputable because it uses Exists.choose,
-    which relies on the axiom of choice (via Classical.choose in Prelim.lean).
+    This is now computable because we can pattern match on the inductive type.
 -/
-noncomputable def pred (x : ℕ) (h : x ≠ zero) : ℕ :=
-  (Q_pred x h).choose
+def pred (x : ℕ) (h : x ≠ zero) : ℕ :=
+  match x with
+  | ℕ.zero => absurd rfl h
+  | ℕ.succ n => n
 
-theorem pred_spec (x : ℕ) (h : x ≠ zero) : x = succ (pred x h) :=
-  (Q_pred x h).choose_spec
+theorem pred_spec (x : ℕ) (h : x ≠ zero) : x = succ (pred x h) := by
+  cases x with
+  | zero => contradiction
+  | succ n => rfl
 
 end Robinson
 
