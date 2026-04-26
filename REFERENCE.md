@@ -88,7 +88,7 @@ This document complies with all requirements specified in [AI-GUIDE.md](AI-GUIDE
 
 | Module | Namespace | Dependencies | Status |
 |--------|-----------|--------------|--------|
-| `Prelim.lean` | top-level | `Init.Classical` | ✅ Completo |
+| `Prelim.lean` | top-level | none (Lean 4 core only) | ✅ Completo |
 
 *Status codes*: ✅ Complete · 🧊 Frozen · 🔶 Partial · 🔄 In progress · ❌ Pending
 
@@ -98,8 +98,11 @@ This document complies with all requirements specified in [AI-GUIDE.md](AI-GUIDE
 
 ```mermaid
 graph TD
-    IC[Init.Classical] --> P[Prelim.lean]
+    LC[Lean 4 Core + Classical] --> P[Prelim.lean]
 ```
+
+**Note**: This project has no external dependencies. It uses only Lean 4's core library
+and the classical axiom of choice via `open Classical`.
 
 *(Update this diagram as modules are added)*
 
@@ -110,14 +113,16 @@ graph TD
 ### 3.1 Prelim.lean
 
 **Namespace**: top-level (no namespace wrapper)
-**Dependencies**: `Init.Classical`
-**Last updated**: 2026-04-10 00:00
+**Dependencies**: none (uses only Lean 4 core, `open Classical`)
+**Last updated**: 2026-04-26 00:00
 **Status**: ✅ Completo
 **@axiom_system**: `none`
 **@importance**: `foundational`
 
 Foundational infrastructure used by all modules: custom `ExistsUnique` with full API,
 both `∃!` and `∃¹` notations, dot-notation style and Peano-compatible aliases.
+
+**Note**: This project is completely independent of Mathlib. All development is from scratch.
 
 #### ExistsUnique
 
@@ -131,7 +136,7 @@ def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
 ```
 
 **Computability**: noncomputable (witness extraction uses `Classical.choose`)
-**Dependencies**: `Init.Classical`
+**Dependencies**: Lean 4 core (`Classical.choose` from standard library)
 
 **Full API**:
 
