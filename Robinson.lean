@@ -9,3 +9,4 @@ License: MIT
 -- Run 'bash gen-root.bash' after adding or removing modules.
 
 import Robinson.Prelim
+import Robinson.Axioms
