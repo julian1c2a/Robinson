@@ -30,9 +30,13 @@ Ver [CONSTRUCTIVISM.md](CONSTRUCTIVISM.md) para detalles completos sobre la filo
 Robinson es un proyecto de matemáticas formales desarrollado desde cero en Lean 4,
 siguiendo estrictamente los principios del **constructivismo matemático**.
 
+El objetivo del proyecto es implementar la **Aritmética de Robinson (Q)** de manera
+completamente constructiva y desarrollar la maquinaria necesaria para demostrar los
+**Teoremas de Incompletitud de Gödel**.
+
 Cada definición es computable, cada prueba es constructiva, y ningún axioma clásico
-es utilizado. El proyecto demuestra que las matemáticas pueden desarrollarse de
-manera rigurosa y formal sin recurrir a la lógica clásica.
+es utilizado. El proyecto demuestra que las matemáticas fundamentales pueden
+desarrollarse de manera rigurosa y formal sin recurrir a la lógica clásica.
 
 ### Principios Fundamentales
 
@@ -41,11 +45,25 @@ manera rigurosa y formal sin recurrir a la lógica clásica.
 3. **Intuicionismo**: La lógica subyacente es intuicionista (sin LEM)
 4. **Independencia**: Sin dependencias externas (ni Mathlib ni otras bibliotecas clásicas)
 
+### Objetivo: Teoremas de Incompletitud de Gödel
+
+El proyecto está diseñado para demostrar constructivamente los teoremas de incompletitud
+de Gödel, mostrando que:
+
+1. **Primer Teorema**: En cualquier sistema formal consistente que contenga aritmética
+   básica, existen enunciados verdaderos que no pueden ser probados dentro del sistema.
+
+2. **Segundo Teorema**: Ningún sistema formal consistente puede probar su propia consistencia.
+
+La implementación constructiva garantiza que todas las construcciones (numeración de Gödel,
+funciones recursivas, etc.) son computables y verificables.
+
 ## Módulos
 
 | Módulo | Namespace | Dependencias | Estado | Constructivo |
 |--------|-----------|--------------|--------|--------------|
 | `Prelim.lean` | top-level | — | ✅ Completo | ✅ Sí |
+| `Axioms.lean` | `Robinson` | `Prelim.lean` | ✅ Completo | ✅ Sí |
 
 **Leyenda de estado**:
 - ✅ Completo — Totalmente documentado y proyectado en REFERENCE.md
@@ -56,13 +74,29 @@ manera rigurosa y formal sin recurrir a la lógica clásica.
 
 **Constructivo**: Todos los módulos deben ser ✅ (estrictamente constructivos).
 
+### Aritmética de Robinson (Q)
+
+El módulo `Axioms.lean` implementa la **Aritmética de Robinson** de manera completamente
+constructiva. En lugar de axiomas, define los números naturales como tipo inductivo:
+
+- **Tipo**: `ℕ` con constructores `zero` y `succ`
+- **Operaciones**: `add` y `mul` definidas por recursión
+- **Axiomas Q1-Q7**: Probados como teoremas
+- **Decidibilidad**: Función `isZero` computable
+- **Predecesor**: Función `pred` computable con testigo explícito
+
+Esta implementación es **más fuerte** que Q axiomático (tenemos inducción) pero es
+completamente constructiva y suficiente para demostrar los teoremas de incompletitud
+de Gödel.
+
 ## Estructura del Proyecto
 
 ```text
 Robinson/
 ├── Prelim.lean              # Definiciones fundamentales (ExistsUnique constructivo)
+├── Axioms.lean              # Aritmética de Robinson (Q) como tipo inductivo
 ├── _template.lean           # Plantilla para nuevos módulos (no importado)
-└── (futuros subdirectorios temáticos)
+└── (futuros módulos: codificación de Gödel, funciones recursivas, etc.)
 Robinson.lean                # Módulo raíz (auto-generado por gen-root.bash)
 ```
 

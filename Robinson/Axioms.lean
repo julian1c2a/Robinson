@@ -84,7 +84,7 @@ infixl:70 " * " => mul
     This is now a theorem, proven by the inductive definition.
 -/
 theorem Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero := by
-  intro x h
+  intro _ h
   cases h
 
 /-- **Q2**: Successor is injective.
@@ -174,7 +174,7 @@ theorem Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x := by
 instance (x : ℕ) : Decidable (x = zero) :=
   match x with
   | ℕ.zero => isTrue rfl
-  | ℕ.succ n => isFalse (fun h => ℕ.noConfusion h)
+  | ℕ.succ _ => isFalse (fun h => ℕ.noConfusion h)
 
 /-! ### Basic Derived Properties ### -/
 

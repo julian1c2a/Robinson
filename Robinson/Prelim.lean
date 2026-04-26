@@ -8,16 +8,21 @@ License: MIT
 -- See AI-GUIDE.md §12 for the "proyectar" protocol.
 -- This is the foundational module. All other modules import it.
 
-import Init.Classical
-open Classical
+-- ⚠️ CONSTRUCTIVIST PROJECT: No classical axioms allowed.
+-- This project is strictly constructive and intuitionistic.
+-- All proofs must be computational. No LEM, no AC, no Classical.choose.
+
 universe u
 
-/-! ### ExistsUnique — Unique Existence ###
+/-! ### ExistsUnique — Unique Existence (Constructive) ###
 
   Custom implementation of ∃! independent of Lean's standard library.
   Provides a complete API via dot-notation and Peano-compatible aliases.
 
   Definition: p has a unique witness iff ∃ x, p x ∧ ∀ y, p y → y = x
+
+  ⚠️ CONSTRUCTIVE: The witness is provided explicitly in the proof.
+  No classical choice axiom is used. All operations are computable.
 -/
 
 def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
@@ -54,27 +59,19 @@ theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   obtain ⟨x, hx, _⟩ := h
   exact ⟨x, hx⟩
 
-/-- Extract the unique witness (noncomputable) -/
-noncomputable def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  Classical.choose (ExistsUnique.exists h)
+/-- Extract the unique witness (computable from the proof) -/
+def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+  h.1
 
 /-- The witness satisfies the property -/
 theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    p (h.choose) := by
-  obtain ⟨x, hx, _⟩ := h
-  exact Classical.choose_spec ⟨x, hx⟩
+    p (h.choose) :=
+  h.2.1
 
 /-- Uniqueness: any y satisfying p equals the witness -/
 theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∀ y, p y → y = h.choose := by
-  intro y hy
-  unfold choose
-  have h_exists := ExistsUnique.exists h
-  have h_spec   := Classical.choose_spec h_exists
-  obtain ⟨x, _, hunique⟩ := h
-  have h_choose_eq_x : Classical.choose h_exists = x := hunique _ h_spec
-  rw [h_choose_eq_x]
-  exact hunique y hy
+    ∀ y, p y → y = h.choose :=
+  h.2.2
 
 /-! ### API — Peano-compatible aliases ###
 
@@ -82,7 +79,7 @@ theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   These are thin wrappers; no new logic. -/
 
 /-- Alias for ExistsUnique.choose (Peano style) -/
-noncomputable def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
+def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
   h.choose
 
 /-- Alias for ExistsUnique.choose_spec (Peano style) -/

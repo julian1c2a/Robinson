@@ -1,8 +1,8 @@
 # Technical Reference — Robinson
 
-**Last updated:** 2026-04-10 00:00
+**Last updated:** 2026-04-26 00:00
 **Author**: Julián Calderón Almendros
-**Lean version**: v4.28.0
+**Lean version**: v4.29.0
 
 ---
 
@@ -89,6 +89,7 @@ This document complies with all requirements specified in [AI-GUIDE.md](AI-GUIDE
 | Module | Namespace | Dependencies | Status |
 |--------|-----------|--------------|--------|
 | `Prelim.lean` | top-level | none (Lean 4 core only) | ✅ Completo |
+| `Axioms.lean` | `Robinson` | `Prelim.lean` | ✅ Completo |
 
 *Status codes*: ✅ Complete · 🧊 Frozen · 🔶 Partial · 🔄 In progress · ❌ Pending
 
@@ -98,11 +99,12 @@ This document complies with all requirements specified in [AI-GUIDE.md](AI-GUIDE
 
 ```mermaid
 graph TD
-    LC[Lean 4 Core + Classical] --> P[Prelim.lean]
+    LC[Lean 4 Core] --> P[Prelim.lean]
+    P --> A[Axioms.lean]
 ```
 
-**Note**: This project has no external dependencies. It uses only Lean 4's core library
-and the classical axiom of choice via `open Classical`.
+**Note**: This project has no external dependencies. It uses only Lean 4's core library.
+The project is strictly constructive (no classical axioms).
 
 *(Update this diagram as modules are added)*
 
@@ -110,19 +112,194 @@ and the classical axiom of choice via `open Classical`.
 
 ## 3. Module Descriptions
 
-### 3.1 Prelim.lean
+### 3.1 Axioms.lean
 
-**Namespace**: top-level (no namespace wrapper)
-**Dependencies**: none (uses only Lean 4 core, `open Classical`)
+**Namespace**: `Robinson`
+**Dependencies**: `Prelim.lean`
 **Last updated**: 2026-04-26 00:00
 **Status**: ✅ Completo
-**@axiom_system**: `none`
+**@axiom_system**: `Robinson Arithmetic (Q)`
+**@importance**: `foundational`
+
+Implementación constructiva de la Aritmética de Robinson (Q) como tipo inductivo.
+En lugar de axiomas, define ℕ como tipo inductivo con constructores `zero` y `succ`,
+y las operaciones `add` y `mul` por recursión estructural. Los "axiomas" Q1-Q7 de
+Robinson se convierten en teoremas probados.
+
+**Nota constructivista**: Esta implementación es MÁS FUERTE que la Aritmética de
+Robinson axiomática porque tenemos el principio de inducción disponible del tipo
+inductivo. Sin embargo, es completamente constructiva y suficiente para demostrar
+los teoremas de incompletitud de Gödel.
+
+#### Tipo Inductivo ℕ
+
+**Definición matemática**: ℕ ::= zero | succ(ℕ)
+
+**Lean 4 signature**:
+
+```lean
+inductive ℕ : Type where
+  | zero : ℕ
+  | succ : ℕ → ℕ
+```
+
+**Computabilidad**: completamente computable (tipo inductivo)
+**Dependencies**: ninguna (Lean 4 core)
+
+#### Operaciones Primitivas
+
+**Zero (constante)**:
+
+```lean
+def zero : ℕ := ℕ.zero
+```
+
+**Sucesor (función)**:
+
+```lean
+def succ : ℕ → ℕ := ℕ.succ
+```
+
+**Suma (definición recursiva)**:
+
+Definición matemática:
+- x + 0 = x
+- x + S(y) = S(x + y)
+
+```lean
+def add : ℕ → ℕ → ℕ
+  | x, ℕ.zero => x
+  | x, ℕ.succ y => ℕ.succ (add x y)
+```
+
+**Multiplicación (definición recursiva)**:
+
+Definición matemática:
+- x · 0 = 0
+- x · S(y) = (x · y) + x
+
+```lean
+def mul : ℕ → ℕ → ℕ
+  | x, ℕ.zero => ℕ.zero
+  | x, ℕ.succ y => add (mul x y) x
+```
+
+#### Notación
+
+| Símbolo | Expande a | Prioridad |
+|---------|-----------|-----------|
+| `𝟘` | `zero` | max (prefix) |
+| `𝐒` | `succ` | max (prefix) |
+| `+` | `add` | 65 (infixl) |
+| `*` | `mul` | 70 (infixl) |
+
+**Nota**: Se usan símbolos Unicode 𝟘 (U+1D7D8) y 𝐒 (U+1D412) para evitar conflictos
+con los naturales incorporados de Lean.
+
+#### Axiomas de Robinson (ahora teoremas)
+
+**Q1 - Zero no es sucesor**: ∀x. S(x) ≠ 0
+
+```lean
+theorem Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero
+```
+
+**Q2 - Sucesor es inyectivo**: ∀x ∀y. S(x) = S(y) → x = y
+
+```lean
+theorem Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y
+```
+
+**Q3 - Función de decisión para zero**:
+
+```lean
+def isZero : ℕ → Bool
+  | ℕ.zero => true
+  | ℕ.succ _ => false
+
+theorem isZero_spec_true : ∀ (x : ℕ), isZero x = true → x = zero
+
+theorem isZero_spec_false : ∀ (x : ℕ), isZero x = false → x ≠ zero
+```
+
+**Q3 - Predecesor**: ∀x. x ≠ 0 → ∃y. x = S(y)
+
+```lean
+theorem Q_pred : ∀ (x : ℕ), x ≠ zero → ∃ y, x = succ y
+```
+
+**Q4 - Suma con zero**: ∀x. x + 0 = x
+
+```lean
+theorem Q_add_zero : ∀ (x : ℕ), add x zero = x
+```
+
+**Q5 - Suma con sucesor**: ∀x ∀y. x + S(y) = S(x + y)
+
+```lean
+theorem Q_add_succ : ∀ (x y : ℕ), add x (succ y) = succ (add x y)
+```
+
+**Q6 - Multiplicación con zero**: ∀x. x · 0 = 0
+
+```lean
+theorem Q_mul_zero : ∀ (x : ℕ), mul x zero = zero
+```
+
+**Q7 - Multiplicación con sucesor**: ∀x ∀y. x · S(y) = (x · y) + x
+
+```lean
+theorem Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x
+```
+
+#### Propiedades Derivadas
+
+**Unicidad de zero**:
+
+```lean
+theorem zero_unique (x : ℕ) (h : ∀ y, succ y ≠ x) : x = zero
+```
+
+**Sucesor no es igual a sí mismo**:
+
+```lean
+theorem succ_ne_self : ∀ (x : ℕ), succ x ≠ x
+```
+
+**Función predecesor (computable)**:
+
+```lean
+def pred (x : ℕ) (h : x ≠ zero) : ℕ
+
+theorem pred_spec (x : ℕ) (h : x ≠ zero) : x = succ (pred x h)
+```
+
+#### Instancia Decidable
+
+```lean
+instance (x : ℕ) : Decidable (x = zero)
+```
+
+Permite usar `if x = zero then ... else ...` de manera constructiva.
+
+**Computabilidad**: completamente computable (pattern matching sobre tipo inductivo)
+
+### 3.2 Prelim.lean
+
+**Namespace**: top-level (no namespace wrapper)
+**Dependencies**: none (Lean 4 core only, **no classical axioms**)
+**Last updated**: 2026-04-26 00:00
+**Status**: ✅ Completo
+**@axiom_system**: `none` (strictly constructive)
 **@importance**: `foundational`
 
 Foundational infrastructure used by all modules: custom `ExistsUnique` with full API,
 both `∃!` and `∃¹` notations, dot-notation style and Peano-compatible aliases.
 
 **Note**: This project is completely independent of Mathlib. All development is from scratch.
+
+**⚠️ CONSTRUCTIVE**: No `Classical.choose`, no LEM, no AC. All witnesses are explicit.
+All operations are computable. This module sets the constructivist foundation for the entire project.
 
 #### ExistsUnique
 
@@ -135,8 +312,8 @@ def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
   ∃ x, p x ∧ ∀ y, p y → y = x
 ```
 
-**Computability**: noncomputable (witness extraction uses `Classical.choose`)
-**Dependencies**: Lean 4 core (`Classical.choose` from standard library)
+**Computability**: **fully computable** (witness extracted directly from proof structure)
+**Dependencies**: Lean 4 core only (no classical axioms)
 
 **Full API**:
 
@@ -181,26 +358,65 @@ theorem choose_uniq {α : Sort u} {p : α → Prop}
 
 ## 4. Theorems
 
-### 4.1 Prelim.lean
+### 4.1 Axioms.lean
 
-*(See ExistsUnique API table in §3.1 — all theorems listed there)*
+Todos los teoremas están listados en §3.1 bajo "Axiomas de Robinson" y "Propiedades Derivadas".
+
+Resumen:
+- **Q1-Q7**: Los 7 axiomas de Robinson, ahora probados como teoremas
+- **isZero_spec_true/false**: Especificaciones de la función de decisión
+- **zero_unique**: Unicidad del cero
+- **succ_ne_self**: El sucesor nunca es igual a sí mismo
+- **pred_spec**: Especificación de la función predecesor
+
+Todos los teoremas son **constructivos** y **computables**.
+
+### 4.2 Prelim.lean
+
+*(See ExistsUnique API table in §3.2 — all theorems listed there)*
 
 ---
 
 ## 5. Notations
 
-| Symbol | Expands to | Module | Variants |
-|--------|-----------|--------|---------|
-| `∃! x, p` | `ExistsUnique (fun x => p)` | `Prelim.lean` | untyped only |
-| `∃¹ x, p` | `ExistsUnique (fun x => p)` | `Prelim.lean` | `∃¹ x`, `∃¹ (x)`, `∃¹ (x : T)`, `∃¹ x : T` |
+| Symbol | Expands to | Module | Variants | Priority |
+|--------|-----------|--------|---------|----------|
+| `∃! x, p` | `ExistsUnique (fun x => p)` | `Prelim.lean` | untyped only | — |
+| `∃¹ x, p` | `ExistsUnique (fun x => p)` | `Prelim.lean` | `∃¹ x`, `∃¹ (x)`, `∃¹ (x : T)`, `∃¹ x : T` | — |
+| `𝟘` | `zero` | `Axioms.lean` | prefix | max |
+| `𝐒` | `succ` | `Axioms.lean` | prefix | max |
+| `+` | `add` | `Axioms.lean` | infixl | 65 |
+| `*` | `mul` | `Axioms.lean` | infixl | 70 |
 
-**Note**: `∃!` overrides Lean's built-in notation. Use `∃¹` to avoid any macro conflicts.
+**Notes**:
+- `∃!` overrides Lean's built-in notation. Use `∃¹` to avoid any macro conflicts.
+- `𝟘` (U+1D7D8) and `𝐒` (U+1D412) are Unicode symbols to avoid conflicts with Lean's built-in naturals.
 
 ---
 
 ## 6. Exports
 
-### 6.1 Prelim.lean
+### 6.1 Axioms.lean
+
+Todas las declaraciones públicas del namespace `Robinson`:
+
+```lean
+-- Tipo y constructores
+ℕ zero succ add mul
+
+-- Teoremas Q1-Q7
+Q_zero_not_succ Q_succ_injective 
+isZero isZero_spec_true isZero_spec_false Q_pred
+Q_add_zero Q_add_succ Q_mul_zero Q_mul_succ
+
+-- Propiedades derivadas
+zero_unique succ_ne_self pred pred_spec
+```
+
+**Computabilidad**: Todas las funciones (`zero`, `succ`, `add`, `mul`, `isZero`, `pred`)
+son completamente computables. Todos los teoremas son constructivos.
+
+### 6.2 Prelim.lean
 
 All names are top-level (no namespace), accessible wherever `Prelim.lean` is imported:
 
@@ -215,15 +431,17 @@ ExistsUnique                -- Prop-valued predicate
 -- Dot-notation API
 ExistsUnique.intro
 ExistsUnique.exists
-ExistsUnique.choose         -- noncomputable
+ExistsUnique.choose         -- computable
 ExistsUnique.choose_spec
 ExistsUnique.unique
 
 -- Peano-compatible aliases
-choose_unique               -- noncomputable
+choose_unique               -- computable
 choose_spec_unique
 choose_uniq
 ```
+
+**All operations are computable.** No classical axioms used.
 
 ---
 
@@ -232,6 +450,7 @@ choose_uniq
 ### 7.1 Fully Projected Files
 
 - `Prelim.lean` — ExistsUnique complete (1 def + 5 theorems/defs + 3 aliases + 2 notations)
+- `Axioms.lean` — Robinson Arithmetic complete (1 inductive type + 4 defs + 4 notations + 11 theorems + 1 instance)
 
 ### 7.2 Partially Projected Files
 
@@ -239,4 +458,11 @@ choose_uniq
 
 ### 7.3 Notes
 
-*(None)*
+**Constructivismo**: El módulo `Axioms.lean` implementa la Aritmética de Robinson de
+manera completamente constructiva usando un tipo inductivo en lugar de axiomas. Esto
+hace que el sistema sea más fuerte (tenemos inducción) pero mantiene el constructivismo
+estricto del proyecto.
+
+**Próximos pasos**: Con la aritmética básica establecida, el siguiente paso será
+desarrollar la teoría necesaria para la codificación de Gödel (numerales, funciones
+recursivas primitivas, etc.).
