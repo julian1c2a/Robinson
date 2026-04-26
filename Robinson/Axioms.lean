@@ -78,21 +78,22 @@ axiom Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero
 -/
 axiom Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y
 
-/-- **Q3 (Constructive)**: Decidability of zero.
+/-- **Q3 (Constructive)**: Decision function for zero.
     This replaces the classical Q3: ∀x. x = 0 ∨ ∃y. x = S(y)
     
     The classical version is non-constructive (uses LEM).
-    Instead, we axiomatize that equality with zero is decidable,
-    which allows constructive case analysis via `if x = 0 then ... else ...`
+    Instead, we axiomatize a computable function that decides whether
+    a number is zero, along with correctness specifications.
     
-    From decidability, we can derive:
-    - If x = 0, then x is zero.
-    - If x ≠ 0, then ∃y. x = S(y) (by Q_pred below).
-    
-    Note: Marked noncomputable because Lean's code generator cannot
-    compile axioms that return typeclass instances.
+    This allows constructive case analysis via `if isZero x then ... else ...`
 -/
-noncomputable axiom Q_decidable_zero : ∀ (x : ℕ), Decidable (x = zero)
+axiom isZero : ℕ → Bool
+
+/-- Specification: if isZero returns true, then x is zero -/
+axiom isZero_spec_true : ∀ (x : ℕ), isZero x = true → x = zero
+
+/-- Specification: if isZero returns false, then x is not zero -/
+axiom isZero_spec_false : ∀ (x : ℕ), isZero x = false → x ≠ zero
 
 /-- **Q3 (Predecessor)**: Every non-zero number is a successor.
     ∀x. x ≠ 𝟘 → ∃y. x = 𝐒(y)
@@ -124,13 +125,15 @@ axiom Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x
 
 /-! ### Decidability Instance ### -/
 
-/-- Make decidability of zero available globally.
+/-- Decidability instance derived from isZero.
     
-    Note: This is noncomputable because it's based on an axiom.
-    Use `haveI : Decidable (x = zero) := Q_decidable_zero x` in proofs
-    where you need decidability.
+    This instance is computable because it's based on the boolean function isZero.
 -/
-noncomputable instance (x : ℕ) : Decidable (x = zero) := Q_decidable_zero x
+instance (x : ℕ) : Decidable (x = zero) :=
+  if h : isZero x = true then
+    isTrue (isZero_spec_true x h)
+  else
+    isFalse (isZero_spec_false x (Bool.eq_false_iff_ne_true.mpr h))
 
 /-! ### Basic Derived Properties ### -/
 
@@ -173,7 +176,7 @@ end Robinson
 -- Export all public declarations from Robinson namespace
 export Robinson (
   ℕ zero succ add mul
-  Q_zero_not_succ Q_succ_injective Q_decidable_zero Q_pred
+  Q_zero_not_succ Q_succ_injective isZero isZero_spec_true isZero_spec_false Q_pred
   Q_add_zero Q_add_succ Q_mul_zero Q_mul_succ
   zero_unique succ_ne_self pred pred_spec
 )
