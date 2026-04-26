@@ -59,44 +59,23 @@ theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p)
   obtain ⟨w, hw, _⟩ := h
   exact ⟨w, hw⟩
 
-/-- Extract the unique witness (uses Exists.choose from the underlying existence proof) -/
-noncomputable def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  h.exists.choose
-
-/-- The witness satisfies the property -/
-theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    p (h.choose) := by
-  unfold choose
+/-- Uniqueness: any two witnesses are equal -/
+theorem ExistsUnique.unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
+    ∀ x y, p x → p y → x = y := by
+  intro x y hx hy
   obtain ⟨w, hw, huniq⟩ := h
-  exact huniq _ h.exists.choose_spec ▸ hw
-
-/-- Uniqueness: any y satisfying p equals the witness -/
-theorem ExistsUnique.eq_witness {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∀ y, p y → y = h.choose := by
-  intro y hy
-  unfold choose
-  obtain ⟨w, hw, huniq⟩ := h
-  calc y = w := huniq y hy
-       _ = h.exists.choose := (huniq _ h.exists.choose_spec).symm
+  calc x = w := huniq x hx
+       _ = y := (huniq y hy).symm
 
 /-! ### API — Peano-compatible aliases ###
 
   Mirror the Peano.PeanoNatLib naming convention for cross-project compatibility.
   These are thin wrappers; no new logic. -/
 
-/-- Alias for ExistsUnique.choose (Peano style) -/
-noncomputable def choose_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  h.choose
-
-/-- Alias for ExistsUnique.choose_spec (Peano style) -/
-theorem choose_spec_unique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    p (choose_unique h) :=
-  h.choose_spec
-
-/-- Alias for ExistsUnique.eq_witness with implicit y (Peano argument style) -/
-theorem choose_uniq {α : Sort u} {p : α → Prop} (h : ExistsUnique p) {y : α} (hy : p y) :
-    y = choose_unique h :=
-  h.eq_witness y hy
+/-- Alias for ExistsUnique.unique (Peano style) -/
+theorem unique_of_existsUnique {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
+    ∀ x y, p x → p y → x = y :=
+  h.unique
 
 /-! ### User definitions go below this line ###
   Add preliminary definitions, notations, and helper lemmas specific

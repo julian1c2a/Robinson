@@ -320,10 +320,11 @@ def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
 | Name (dot-notation) | Peano alias | Description |
 |---------------------|-------------|-------------|
 | `ExistsUnique.intro w hw h` | — | constructor |
-| `ExistsUnique.exists h` | `ExistsUnique.exists h` | extracts `∃ x, p x` |
-| `ExistsUnique.choose h` | `choose_unique h` | noncomputable witness |
-| `ExistsUnique.choose_spec h` | `choose_spec_unique h` | witness satisfies p |
-| `ExistsUnique.unique h y hy` | `choose_uniq h hy` | uniqueness: `y = witness` |
+| `ExistsUnique.exists h` | — | extracts `∃ x, p x` |
+| `ExistsUnique.unique h` | `unique_of_existsUnique h` | uniqueness: any two witnesses are equal |
+
+**Nota constructivista**: No hay función `choose` porque requeriría `Classical.choose`.
+Para extraer el testigo, usa pattern matching: `obtain ⟨w, hw, huniq⟩ := h`.
 
 **Lean 4 signatures**:
 
@@ -334,24 +335,21 @@ theorem ExistsUnique.intro {α : Sort u} {p : α → Prop} (w : α)
 theorem ExistsUnique.exists {α : Sort u} {p : α → Prop}
     (h : ExistsUnique p) : ∃ x, p x
 
-def ExistsUnique.choose {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) : α
-
-theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) : p (h.choose)
-
 theorem ExistsUnique.unique {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) : ∀ y, p y → y = h.choose
+    (h : ExistsUnique p) : ∀ x y, p x → p y → x = y
 
--- Peano-compatible aliases:
-def choose_unique {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) : α
+-- Peano-compatible alias:
+theorem unique_of_existsUnique {α : Sort u} {p : α → Prop}
+    (h : ExistsUnique p) : ∀ x y, p x → p y → x = y
+```
 
-theorem choose_spec_unique {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) : p (choose_unique h)
+**Uso constructivo**: Para extraer el testigo, usa pattern matching:
 
-theorem choose_uniq {α : Sort u} {p : α → Prop}
-    (h : ExistsUnique p) {y : α} (hy : p y) : y = choose_unique h
+```lean
+obtain ⟨w, hw, huniq⟩ := h
+-- w : α es el testigo
+-- hw : p w es la prueba de que w satisface p
+-- huniq : ∀ y, p y → y = w es la prueba de unicidad
 ```
 
 ---
@@ -431,17 +429,16 @@ ExistsUnique                -- Prop-valued predicate
 -- Dot-notation API
 ExistsUnique.intro
 ExistsUnique.exists
-ExistsUnique.choose         -- computable
-ExistsUnique.choose_spec
 ExistsUnique.unique
 
--- Peano-compatible aliases
-choose_unique               -- computable
-choose_spec_unique
-choose_uniq
+-- Peano-compatible alias
+unique_of_existsUnique
 ```
 
 **All operations are computable.** No classical axioms used.
+
+**No `choose` function**: Extracting the witness requires pattern matching (`obtain`),
+which is the constructive way to work with existential proofs.
 
 ---
 
@@ -449,7 +446,7 @@ choose_uniq
 
 ### 7.1 Fully Projected Files
 
-- `Prelim.lean` — ExistsUnique complete (1 def + 5 theorems/defs + 3 aliases + 2 notations)
+- `Prelim.lean` — ExistsUnique complete (1 def + 3 theorems + 1 alias + 2 notations)
 - `Axioms.lean` — Robinson Arithmetic complete (1 inductive type + 4 defs + 4 notations + 11 theorems + 1 instance)
 
 ### 7.2 Partially Projected Files
