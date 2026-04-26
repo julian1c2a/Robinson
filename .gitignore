@@ -26,3 +26,41 @@ locked_files.txt.tmp
 .aider*
 .env
 .env
+# Lean 4 build artifacts
+/.lake/
+/build/
+*.olean
+*.ilean
+*.trace
+*.c
+*.o
+
+# Lake manifest (generated)
+lake-manifest.json
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment and secrets
+.env
+.env.local
+*.key
+*.pem
+
+# Lock files (project-specific)
+locked_files.txt
+frozen_files.txt
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# OS files
+Thumbs.db
+desktop.ini
