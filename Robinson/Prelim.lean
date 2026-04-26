@@ -21,14 +21,12 @@ universe u
 
   Definition: p has a unique witness iff ∃ x, p x ∧ ∀ y, p y → y = x
 
-  ⚠️ CONSTRUCTIVE: Implemented as a structure with explicit witness field.
-  The witness is directly accessible and computable. No classical axioms used.
+  ⚠️ CONSTRUCTIVE: Defined as Prop with explicit witness extraction.
+  The witness is accessible via pattern matching. No classical axioms used.
 -/
 
-structure ExistsUnique {α : Sort u} (p : α → Prop) : Prop where
-  witness : α
-  property : p witness
-  unique : ∀ y, p y → y = witness
+def ExistsUnique {α : Sort u} (p : α → Prop) : Prop :=
+  ∃ x, p x ∧ ∀ y, p y → y = x
 
 /-! ### Notation ###
   ∃! x, p   — standard-looking notation (overrides Lean built-in ∃!)
@@ -57,22 +55,23 @@ theorem ExistsUnique.intro {α : Sort u} {p : α → Prop} (w : α)
 
 /-- Extract ∃ x, p x from ExistsUnique p -/
 theorem ExistsUnique.exists {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
-    ∃ x, p x :=
-  ⟨h.witness, h.property⟩
+    ∃ x, p x := by
+  obtain ⟨w, hw, _⟩ := h
+  exact ⟨w, hw⟩
 
-/-- Extract the unique witness (computable, direct field access) -/
+/-- Extract the unique witness (computable via pattern matching) -/
 def ExistsUnique.choose {α : Sort u} {p : α → Prop} (h : ExistsUnique p) : α :=
-  h.witness
+  h.1
 
 /-- The witness satisfies the property -/
 theorem ExistsUnique.choose_spec {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
     p (h.choose) :=
-  h.property
+  h.2.1
 
 /-- Uniqueness: any y satisfying p equals the witness -/
 theorem ExistsUnique.eq_witness {α : Sort u} {p : α → Prop} (h : ExistsUnique p) :
     ∀ y, p y → y = h.choose :=
-  h.unique
+  h.2.2
 
 /-! ### API — Peano-compatible aliases ###
 
