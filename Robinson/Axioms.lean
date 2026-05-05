@@ -28,11 +28,11 @@ import Robinson.Prelim
   - Constructors: zero (𝟘), succ (𝐒)
   - Operations: + (addition), * (multiplication)
   - Relation: = (equality, from Lean's core)
-  
+
   **Notation**: We use Unicode symbols 𝟘 and 𝐒 to avoid conflicts with
   Lean's built-in natural numbers. In mathematical notation, these correspond
   to the standard 0 and S.
-  
+
   **Note**: This implementation is STRONGER than axiomatic Robinson Arithmetic
   because we have the induction principle available from the inductive type.
   However, it is completely constructive and allows us to prove Gödel's
@@ -64,7 +64,7 @@ def add : ℕ → ℕ → ℕ
 
 /-- Multiplication (defined recursively) -/
 def mul : ℕ → ℕ → ℕ
-  | x, ℕ.zero => ℕ.zero
+  | _, ℕ.zero => ℕ.zero
   | x, ℕ.succ y => add (mul x y) x
 
 /-! ### Notation ### -/
@@ -80,7 +80,7 @@ infixl:70 " * " => mul
 
 /-- **Q1**: Zero is not a successor.
     ∀x. 𝐒(x) ≠ 𝟘
-    
+
     This is now a theorem, proven by the inductive definition.
 -/
 theorem Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero := by
@@ -89,7 +89,7 @@ theorem Q_zero_not_succ : ∀ (x : ℕ), succ x ≠ zero := by
 
 /-- **Q2**: Successor is injective.
     ∀x ∀y. 𝐒(x) = 𝐒(y) → x = y
-    
+
     This is now a theorem, proven by the inductive definition.
 -/
 theorem Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y := by
@@ -97,7 +97,7 @@ theorem Q_succ_injective : ∀ (x y : ℕ), succ x = succ y → x = y := by
   injection h
 
 /-- **Q3 (Constructive)**: Decision function for zero.
-    
+
     This is now computable, defined by pattern matching on the inductive type.
 -/
 def isZero : ℕ → Bool
@@ -120,7 +120,7 @@ theorem isZero_spec_false : ∀ (x : ℕ), isZero x = false → x ≠ zero := by
 
 /-- **Q3 (Predecessor)**: Every non-zero number is a successor.
     ∀x. x ≠ 𝟘 → ∃y. x = 𝐒(y)
-    
+
     This is now a theorem with explicit witness extraction.
 -/
 theorem Q_pred : ∀ (x : ℕ), x ≠ zero → ∃ y, x = succ y := by
@@ -131,7 +131,7 @@ theorem Q_pred : ∀ (x : ℕ), x ≠ zero → ∃ y, x = succ y := by
 
 /-- **Q4**: Addition with zero (right identity).
     ∀x. x + 𝟘 = x
-    
+
     This is now a theorem, proven by the definition of add.
 -/
 theorem Q_add_zero : ∀ (x : ℕ), add x zero = x := by
@@ -140,7 +140,7 @@ theorem Q_add_zero : ∀ (x : ℕ), add x zero = x := by
 
 /-- **Q5**: Addition with successor (recursive definition).
     ∀x ∀y. x + 𝐒(y) = 𝐒(x + y)
-    
+
     This is now a theorem, proven by the definition of add.
 -/
 theorem Q_add_succ : ∀ (x y : ℕ), add x (succ y) = succ (add x y) := by
@@ -149,7 +149,7 @@ theorem Q_add_succ : ∀ (x y : ℕ), add x (succ y) = succ (add x y) := by
 
 /-- **Q6**: Multiplication with zero (right annihilation).
     ∀x. x * 𝟘 = 𝟘
-    
+
     This is now a theorem, proven by the definition of mul.
 -/
 theorem Q_mul_zero : ∀ (x : ℕ), mul x zero = zero := by
@@ -158,7 +158,7 @@ theorem Q_mul_zero : ∀ (x : ℕ), mul x zero = zero := by
 
 /-- **Q7**: Multiplication with successor (recursive definition).
     ∀x ∀y. x * 𝐒(y) = (x * y) + x
-    
+
     This is now a theorem, proven by the definition of mul.
 -/
 theorem Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x := by
@@ -168,7 +168,7 @@ theorem Q_mul_succ : ∀ (x y : ℕ), mul x (succ y) = add (mul x y) x := by
 /-! ### Decidability Instance ### -/
 
 /-- Decidability instance derived from isZero.
-    
+
     This instance is computable because it's based on pattern matching.
 -/
 instance (x : ℕ) : Decidable (x = zero) :=
@@ -187,7 +187,7 @@ theorem zero_unique (x : ℕ) (h : ∀ y, succ y ≠ x) : x = zero := by
     exact absurd rfl (h y)
 
 /-- Successor is not equal to its argument.
-    
+
     This is now provable by induction on the inductive type.
 -/
 theorem succ_ne_self : ∀ (x : ℕ), succ x ≠ x := by
@@ -199,7 +199,7 @@ theorem succ_ne_self : ∀ (x : ℕ), succ x ≠ x := by
     exact ih h'
 
 /-- Non-zero numbers have predecessors (computable witness extraction).
-    
+
     This is now computable because we can pattern match on the inductive type.
 -/
 def pred (x : ℕ) (h : x ≠ zero) : ℕ :=
@@ -218,8 +218,23 @@ end Robinson
 
 -- Export all public declarations from Robinson namespace
 export Robinson (
-  ℕ zero succ add mul
-  Q_zero_not_succ Q_succ_injective isZero isZero_spec_true isZero_spec_false Q_pred
-  Q_add_zero Q_add_succ Q_mul_zero Q_mul_succ
-  zero_unique succ_ne_self pred pred_spec
+  ℕ
+  zero
+  succ
+  add
+  mul
+  Q_zero_not_succ
+  Q_succ_injective
+  isZero
+  isZero_spec_true
+  isZero_spec_false
+  Q_pred
+  Q_add_zero
+  Q_add_succ
+  Q_mul_zero
+  Q_mul_succ
+  zero_unique
+  succ_ne_self
+  pred
+  pred_spec
 )
