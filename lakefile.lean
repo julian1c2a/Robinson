@@ -23,8 +23,10 @@ package «Robinson» where
 -- require somedep from git
 --   "https://github.com/user/repo" @ "main"
 
+require FOL from git
+  "https://github.com/julian1c2a/FOL.git" @ "master"
+
 -- ─────────────────────────────────────────────────────────────────────────────
 
 @[default_target]
 lean_lib «Robinson» where
-
